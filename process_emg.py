@@ -67,10 +67,10 @@ axes_env.plot(time_dynamic, emg_RRec_dyn_env, 'r')
 axes_env.set_title('Linear Envelope')
 plt.show()
 
-# normalize dynamic trial
+# normalize dynamic trial to MVC
 emg_RRec_dyn_norm = (emg_RRec_dyn_env / emg_RRec_MVC_env) * 100
 
-# plot normalized data?
+# plot normalized data as percentage of MVC
 fig_norm = plt.figure(dpi=200)
 axes_norm = fig_norm.add_axes([0.1,0.1,0.8,0.8])
 axes_norm.plot(time_dynamic, emg_RRec_dyn_norm, 'c')
