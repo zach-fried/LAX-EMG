@@ -1,0 +1,2 @@
+1. Refactor process_emg.py
+2. Create script to import and process all dynamic trials for a single subject
