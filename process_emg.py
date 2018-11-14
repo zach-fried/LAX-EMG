@@ -76,3 +76,5 @@ axes_norm = fig_norm.add_axes([0.1,0.1,0.8,0.8])
 axes_norm.plot(time_dynamic, emg_RRec_dyn_norm, 'c')
 axes_norm.set_title('Normalized Data?')
 plt.show()
+
+print(emg_RRec_dyn_norm.max())
