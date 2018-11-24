@@ -17,11 +17,9 @@ def import_dynamic(file):
     else:
         print('ERROR: This file is not a dynamic trial.')
 
-# TO DO: Think of algorithm for processing. Do you want to
-# take in all right side with one function and all left side
-# with a separate function? Need to associate proper MVC file
-# with each muscle group.
-
+# Takes in MVC files and dynamic trial file and parses data into
+# a dictionary. Keys are equal to the muscle name and values are
+# equal to the raw EMG data.
 def parse_emg(emg_MVC_RQuad, emg_MVC_RHam, emg_MVC_LQuad, 
 emg_MVC_LHam, emg_dynamic):
 

@@ -57,9 +57,24 @@ plt.show()
 emg_MVC_rect = dict()
 emg_dyn_rect = dict()
 
+# SOMETHING IS GOING WRONG HERE - OUTPUT FILE CONTAINS NEGATIVE
+# VALUES DESPITE FULL WAVE RECTIFICATION
 for k in emg_MVC_dict:
     emg_MVC_rect[k] = abs(emg_MVC_high[k])
     emg_dyn_rect[k] = abs(emg_dyn_high[k])
+
+# Trying to track down negative values
+pd.DataFrame(emg_MVC_rect).to_excel('emg_MVC_rect.xlsx')
+pd.DataFrame(emg_dyn_rect).to_excel('emg_dyn_rect.xlsx')
+
+"""
+fig_rect = plt.figure(dpi=200)
+axes_rect = fig_rect.add_axes([0.1,0.1,0.8,0.8])
+axes_rect.plot(time, emg_MVC_rect['LVM'], 'b')
+axes_rect.plot(time, emg_dyn_rect['LVM'], 'r')
+axes_rect.set_title('Rectified')
+plt.show()
+"""
 
 # low pass filter data to calculate linear envelope
 d, c = signal.butter(4, cutoff_low/nyq, btype='lowpass')
@@ -70,26 +85,35 @@ emg_dyn_env = dict()
 for k in emg_MVC_dict:
     emg_MVC_env[k] = signal.filtfilt(d, c, emg_MVC_rect[k])
     emg_dyn_env[k] = signal.filtfilt(d, c, emg_dyn_rect[k])
-"""
+
+# Trying to track down negative values
+pd.DataFrame(emg_MVC_env).to_excel('emg_MVC_env.xlsx')
+pd.DataFrame(emg_dyn_env).to_excel('emg_dyn_env.xlsx')
+
+
 # plot linear envelopes
 fig_env = plt.figure(dpi=200)
 axes_env = fig_env.add_axes([0.1,0.1,0.8,0.8])
-axes_env.plot(time, emg_MVC_env['RRec'], 'b')
-axes_env.plot(time, emg_dyn_env['RRec'], 'r')
+axes_env.plot(time, emg_MVC_env['LVM'], 'b')
+axes_env.plot(time, emg_dyn_env['LVM'], 'r')
 axes_env.set_title('Linear Envelope')
 plt.show()
-"""
+
+
 # normalize dynamic trial to MVC
 emg_dyn_norm = dict()
 
 for k in emg_MVC_dict:
     emg_dyn_norm[k] = (emg_dyn_env[k] / emg_MVC_env[k]) * 100
+
 """
 # plot normalized data as percentage of MVC
-fig_norm = plt.figure(dpi=200)
-axes_norm = fig_norm.add_axes([0.1,0.1,0.8,0.8])
-axes_norm.plot(time, emg_dyn_norm['RRec'], 'c')
-axes_norm.set_title('Normalized Data?')
+fig_norm, axes_norm = plt.subplots(2, 5)
+#axes_norm = fig_norm.add_axes([0.1,0.1,0.8,0.8])
+for row, k in zip(axes_norm, emg_dyn_norm.keys()):
+    for col in row:
+        col.plot(time, emg_dyn_norm[k])
+#axes_norm.plot(time, emg_dyn_norm['RVM'], time, emg_dyn_norm['RRec'], time, emg_dyn_norm['RVL'], time, emg_dyn_norm['RSemi'], time, emg_dyn_norm['RBic'], time, emg_dyn_norm['LVM'], time, emg_dyn_norm['LRec'], time, emg_dyn_norm['LVL'], time, emg_dyn_norm['LSemi'], time, emg_dyn_norm['LBic'], 'c')
 plt.show()
 """
 
