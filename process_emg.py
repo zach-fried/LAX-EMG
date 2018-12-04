@@ -1,4 +1,5 @@
 import math
+import numpy as np
 import pandas as pd
 from scipy import signal
 import matplotlib.pyplot as plt
@@ -29,26 +30,51 @@ plt.show()
 # Define static variables for filter design
 sample_rate = 4800
 nyq = sample_rate*0.5
-cutoff_high = 30
-cutoff_low = 4
+cutoff_high_pass = 20
+cutoff_low_pass = 20
 
 # high pass filter data
-b, a = signal.butter(4, cutoff_high/nyq, btype='highpass')
+b, a = signal.butter(4, (cutoff_high_pass*1.116)/nyq, btype='highpass')
 
 emg_MVC_high = dict()
 emg_dyn_high = dict()
 
-for k in emg_MVC_dict:
+emg_MVC_high_sum = dict()
+emg_dyn_high_sum = dict()
 
+emg_MVC_high_mean = dict()
+emg_dyn_high_mean = dict()
+
+for k in emg_MVC_dict:
     emg_MVC_high[k] = signal.filtfilt(b, a, emg_MVC_dict[k])
     emg_dyn_high[k] = signal.filtfilt(b, a, emg_dynamic_dict[k])
+
+for k in emg_MVC_high:
+    emg_MVC_high_sum[k] = sum(emg_MVC_high[k])
+    emg_dyn_high_sum[k] = sum(emg_dyn_high[k])
+
+for k in emg_MVC_high_sum:
+    emg_MVC_high_mean[k] = emg_MVC_high_sum[k]/len(emg_MVC_high[k])
+    emg_dyn_high_mean[k] = emg_dyn_high_sum[k]/len(emg_dyn_high[k])
+
+#emg_MVC_high_mean = sum(emg_MVC_high.values())
+#emg_dyn_high_mean = sum(emg_dyn_high.values())
+
+# print(emg_MVC_high_mean)
+# print(emg_dyn_high_mean)
+
+for k in emg_MVC_high:
+    emg_MVC_high[k] = emg_MVC_high[k] - emg_MVC_high_mean[k]
+    emg_dyn_high[k] = emg_dyn_high[k] - emg_dyn_high_mean[k]
+
+pd.DataFrame(emg_MVC_high).to_excel('emg_MVC_high.xlsx')
 
 """
 # plot high pass filtered data
 fig_high = plt.figure(dpi=200)
 axes_high = fig_high.add_axes([0.1,0.1,0.8,0.8])
-axes_high.plot(time_dynamic, emg_RRec_MVC_high, 'b')
-axes_high.plot(time_dynamic, emg_RRec_dyn_high, 'r')
+axes_high.plot(time, emg_MVC_high['LVM'], 'b')
+axes_high.plot(time, emg_dyn_high['LVM'], 'r')
 axes_high.set_title('High pass')
 plt.show()
 """
@@ -77,11 +103,14 @@ plt.show()
 """
 
 # low pass filter data to calculate linear envelope
-d, c = signal.butter(4, cutoff_low/nyq, btype='lowpass')
+d, c = signal.butter(4, (cutoff_low_pass*1.116)/nyq, btype='lowpass')
+
+# print(d, c)
 
 emg_MVC_env = dict()
 emg_dyn_env = dict()
 
+# Testing removal of the mean of the signal to correct DC offset
 for k in emg_MVC_dict:
     emg_MVC_env[k] = signal.filtfilt(d, c, emg_MVC_rect[k])
     emg_dyn_env[k] = signal.filtfilt(d, c, emg_dyn_rect[k])
@@ -94,11 +123,10 @@ pd.DataFrame(emg_dyn_env).to_excel('emg_dyn_env.xlsx')
 # plot linear envelopes
 fig_env = plt.figure(dpi=200)
 axes_env = fig_env.add_axes([0.1,0.1,0.8,0.8])
-axes_env.plot(time, emg_MVC_env['LVM'], 'b')
-axes_env.plot(time, emg_dyn_env['LVM'], 'r')
+axes_env.plot(time, emg_MVC_env['RVL'], 'b')
+axes_env.plot(time, emg_dyn_env['RVL'], 'r')
 axes_env.set_title('Linear Envelope')
 plt.show()
-
 
 # normalize dynamic trial to MVC
 emg_dyn_norm = dict()
