@@ -20,6 +20,9 @@ def import_dynamic(file):
 # Takes in MVC files and dynamic trial file and parses data into
 # a dictionary. Keys are equal to the muscle name and values are
 # equal to the raw EMG data.
+
+# TO DO: Instead of returning a dictionary, convert each dict to
+# a pandas dataframe. Much easier to work with!!!
 def parse_emg(emg_MVC_RQuad, emg_MVC_RHam, emg_MVC_LQuad, 
 emg_MVC_LHam, emg_dynamic):
 
