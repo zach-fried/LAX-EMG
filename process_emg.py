@@ -31,10 +31,10 @@ plt.show()
 sample_rate = 4800
 nyq = sample_rate*0.5
 cutoff_high_pass = 20
-cutoff_low_pass = 20
+cutoff_low_pass = 5
 
 # high pass filter data
-b, a = signal.butter(4, (cutoff_high_pass*1.116)/nyq, btype='highpass')
+b, a = signal.butter(6, (cutoff_high_pass*1.116)/nyq, btype='highpass')
 
 emg_MVC_high = dict()
 emg_dyn_high = dict()
@@ -115,33 +115,72 @@ for k in emg_MVC_dict:
     emg_MVC_env[k] = signal.filtfilt(d, c, emg_MVC_rect[k])
     emg_dyn_env[k] = signal.filtfilt(d, c, emg_dyn_rect[k])
 
+"""
 # Trying to track down negative values
 pd.DataFrame(emg_MVC_env).to_excel('emg_MVC_env.xlsx')
 pd.DataFrame(emg_dyn_env).to_excel('emg_dyn_env.xlsx')
+"""
 
-
+"""
 # plot linear envelopes
 fig_env = plt.figure(dpi=200)
 axes_env = fig_env.add_axes([0.1,0.1,0.8,0.8])
-axes_env.plot(time, emg_MVC_env['RVL'], 'b')
-axes_env.plot(time, emg_dyn_env['RVL'], 'r')
+axes_env.plot(time, emg_MVC_env['LRec'], 'b')
+axes_env.plot(time, emg_dyn_env['LRec'], 'r')
 axes_env.set_title('Linear Envelope')
 plt.show()
+"""
 
 # normalize dynamic trial to MVC
 emg_dyn_norm = dict()
 
 for k in emg_MVC_dict:
-    emg_dyn_norm[k] = (emg_dyn_env[k] / emg_MVC_env[k]) * 100
+    emg_dyn_norm[k] = (emg_dyn_env[k] / emg_MVC_env[k].mean()) * 100
+
+# if negative, add min value to all values to correct DC offset
+for k in emg_dyn_norm:
+    if min(emg_dyn_norm[k]) < 0:
+        emg_dyn_norm[k] = emg_dyn_norm[k] + abs(float(min(emg_dyn_norm[k])))
+
+emg_final = pd.DataFrame(emg_dyn_norm)
+
+muscles = ['RVM', 'RRec', 'RVL', 'RSemi', 'RBic', 'LVM', 'LRec',
+'LVL', 'LSemi', 'LBic']
+
+# plot normalized data as percentage of MVC NOT WORKING
+
+fig_norm, axes_norm = plt.subplots(nrows = 2, ncols = 5, dpi=200)
+
+i = 0
+for r in range(0, len(axes_norm[0,:])):
+    axes_norm[0,r].plot(time, emg_final[muscles[i]])
+    axes_norm[0,r].set_title(f'{muscles[i]}')
+    i+= 1
+for c in range(0, len(axes_norm[1,:])):
+    axes_norm[1,c].plot(time, emg_final[muscles[i]])
+    axes_norm[1,c].set_title(f'{muscles[i]}')
+    i += 1
+
+plt.tight_layout()
+plt.show()
 
 """
-# plot normalized data as percentage of MVC
-fig_norm, axes_norm = plt.subplots(2, 5)
-#axes_norm = fig_norm.add_axes([0.1,0.1,0.8,0.8])
-for row, k in zip(axes_norm, emg_dyn_norm.keys()):
-    for col in row:
-        col.plot(time, emg_dyn_norm[k])
-#axes_norm.plot(time, emg_dyn_norm['RVM'], time, emg_dyn_norm['RRec'], time, emg_dyn_norm['RVL'], time, emg_dyn_norm['RSemi'], time, emg_dyn_norm['RBic'], time, emg_dyn_norm['LVM'], time, emg_dyn_norm['LRec'], time, emg_dyn_norm['LVL'], time, emg_dyn_norm['LSemi'], time, emg_dyn_norm['LBic'], 'c')
+for r in axes_norm[0]:
+    for c in axes_norm[1]:
+        print(f'{r}, {c}')
+        #axes_norm[r,c].plot(time, emg_dyn_norm['LRec'], 'c')
+        #axes_norm[r,c].set_title('LRec')
+
+fig_norm
+plt.tight_layout()
+plt.show()
+"""    
+
+# plot single normalized curve
+"""
+fig_norm = plt.figure(dpi=200)
+axes_norm = fig_norm.add_axes([0.1,0.1,0.8,0.8])
+axes_norm.plot(time, emg_dyn_norm['LRec'], 'c')
 plt.show()
 """
 
