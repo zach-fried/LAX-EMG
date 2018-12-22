@@ -67,18 +67,6 @@ for k in emg_MVC_high:
     emg_MVC_high[k] = emg_MVC_high[k] - emg_MVC_high_mean[k]
     emg_dyn_high[k] = emg_dyn_high[k] - emg_dyn_high_mean[k]
 
-pd.DataFrame(emg_MVC_high).to_excel('emg_MVC_high.xlsx')
-
-"""
-# plot high pass filtered data
-fig_high = plt.figure(dpi=200)
-axes_high = fig_high.add_axes([0.1,0.1,0.8,0.8])
-axes_high.plot(time, emg_MVC_high['LVM'], 'b')
-axes_high.plot(time, emg_dyn_high['LVM'], 'r')
-axes_high.set_title('High pass')
-plt.show()
-"""
-
 # full wave rectify data
 emg_MVC_rect = dict()
 emg_dyn_rect = dict()
@@ -88,19 +76,6 @@ emg_dyn_rect = dict()
 for k in emg_MVC_dict:
     emg_MVC_rect[k] = abs(emg_MVC_high[k])
     emg_dyn_rect[k] = abs(emg_dyn_high[k])
-
-# Trying to track down negative values
-pd.DataFrame(emg_MVC_rect).to_excel('emg_MVC_rect.xlsx')
-pd.DataFrame(emg_dyn_rect).to_excel('emg_dyn_rect.xlsx')
-
-"""
-fig_rect = plt.figure(dpi=200)
-axes_rect = fig_rect.add_axes([0.1,0.1,0.8,0.8])
-axes_rect.plot(time, emg_MVC_rect['LVM'], 'b')
-axes_rect.plot(time, emg_dyn_rect['LVM'], 'r')
-axes_rect.set_title('Rectified')
-plt.show()
-"""
 
 # low pass filter data to calculate linear envelope
 d, c = signal.butter(4, (cutoff_low_pass*1.116)/nyq, btype='lowpass')
@@ -114,12 +89,6 @@ emg_dyn_env = dict()
 for k in emg_MVC_dict:
     emg_MVC_env[k] = signal.filtfilt(d, c, emg_MVC_rect[k])
     emg_dyn_env[k] = signal.filtfilt(d, c, emg_dyn_rect[k])
-
-"""
-# Trying to track down negative values
-pd.DataFrame(emg_MVC_env).to_excel('emg_MVC_env.xlsx')
-pd.DataFrame(emg_dyn_env).to_excel('emg_dyn_env.xlsx')
-"""
 
 """
 # plot linear envelopes
@@ -164,18 +133,6 @@ for c in range(0, len(axes_norm[1,:])):
 plt.tight_layout()
 plt.show()
 
-"""
-for r in axes_norm[0]:
-    for c in axes_norm[1]:
-        print(f'{r}, {c}')
-        #axes_norm[r,c].plot(time, emg_dyn_norm['LRec'], 'c')
-        #axes_norm[r,c].set_title('LRec')
-
-fig_norm
-plt.tight_layout()
-plt.show()
-"""    
-
 # plot single normalized curve
 """
 fig_norm = plt.figure(dpi=200)
@@ -184,4 +141,4 @@ axes_norm.plot(time, emg_dyn_norm['LRec'], 'c')
 plt.show()
 """
 
-pd.DataFrame(emg_dyn_norm).to_excel('test.xlsx')
+emg_final.to_excel('test.xlsx')
